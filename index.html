@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey Yasmin - This Too Shall Pass</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Audio Control */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .audio-control:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* GAME SECTION - HANYA DI DEPAN */
+        #gamePortal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #000000 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .nebula {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(119, 198, 255, 0.3) 0%, transparent 50%);
+            animation: nebulaMove 20s ease-in-out infinite;
+        }
+
+        @keyframes nebulaMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .game-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 10;
+            letter-spacing: -2px;
+        }
+
+        .game-subtitle {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 10;
+        }
+
+        .puzzle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+        }
+
+        .orbit {
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit-1 { width: 100%; height: 100%; animation: spin 20s linear infinite; }
+        .orbit-2 { width: 70%; height: 70%; animation: spin 15s linear infinite reverse; }
+        .orbit-3 { width: 40%; height: 40%; animation: spin 10s linear infinite; }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .center-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .center-core:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 0 100px rgba(255,255,255,0.8);
+        }
+
+        .center-core.activated {
+            animation: pulseCore 2s ease-in-out infinite;
+            background: radial-gradient(circle, #f093fb 0%, #f5576c 100%);
+        }
+
+        @keyframes pulseCore {
+            0%, 100% { box-shadow: 0 0 60px rgba(240, 147, 251, 0.5); }
+            50% { box-shadow: 0 0 100px rgba(245, 87, 108, 0.9); }
+        }
+
+        .fragment {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            backdrop-filter: blur(5px);
+        }
+
+        .fragment:hover {
+            transform: scale(1.3);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+
+        .fragment.collected {
+            animation: collectAnim 0.8s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes collectAnim {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(2); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .fragment-1 { top: 0; left: 50%; transform: translateX(-50%); }
+        .fragment-2 { top: 15%; right: 15%; }
+        .fragment-3 { top: 50%; right: 0; transform: translateY(-50%); }
+        .fragment-4 { bottom: 15%; right: 15%; }
+        .fragment-5 { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .fragment-6 { bottom: 15%; left: 15%; }
+        .fragment-7 { top: 50%; left: 0; transform: translateY(-50%); }
+        .fragment-8 { top: 15%; left: 15%; }
+
+        .progress-text {
+            margin-top: 30px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1em;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+        }
+
+        .enter-btn {
+            display: none;
+            margin-top: 40px;
+            padding: 18px 50px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .enter-btn:hover::before {
+            left: 100%;
+        }
+
+        .enter-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(255,255,255,0.1);
+        }
+
+        .hint-text {
+            position: absolute;
+            bottom: 40px;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.4);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* MAIN CONTENT */
+        #mainContent {
+            display: none;
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .hero-title span {
+            display: block;
+            font-size: 0.5em;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-top: 10px;
+            font-family: 'Crimson Text', serif;
+            font-style: italic;
+        }
+
+        .hero-text {
+            font-size: 1.4em;
+            line-height: 1.8;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            font-size: 1.5em;
+            opacity: 0.7;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-20px); }
+            60% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        /* Content Sections */
+        .content-section {
+            min-height: 100vh;
+            padding: 100px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .section-header {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            opacity: 0.6;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 50px;
+            line-height: 1.2;
+        }
+
+        /* Letter Styling */
+        .letter-section {
+            background: #0f0f0f;
+        }
+
+        .letter-paper {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 60px;
+            border-radius: 10px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .letter-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .letter-content {
+            font-size: 1.2em;
+            line-height: 2;
+        }
+
+        .letter-content p {
+            margin-bottom: 25px;
+            text-indent: 40px;
+        }
+
+        .letter-content .greeting {
+            text-indent: 0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .highlight-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 20px 25px;
+            margin: 30px 0;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .signature-block {
+            margin-top: 50px;
+            text-align: right;
+        }
+
+        .signature-block .name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Reality Check Section */
+        .reality-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .truth-grid {
+            display: grid;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .truth-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .truth-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .truth-card:hover {
+            transform: translateX(10px);
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .truth-card:hover::before {
+            opacity: 1;
+        }
+
+        .truth-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3em;
+            font-weight: 700;
+            opacity: 0.2;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+        }
+
+        .truth-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .truth-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        /* Future Section */
+        .future-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            text-align: center;
+        }
+
+        .future-content {
+            max-width: 700px;
+        }
+
+        .quote-large {
+            font-size: 2em;
+            line-height: 1.6;
+            font-style: italic;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .quote-large::before,
+        .quote-large::after {
+            content: '"';
+            position: absolute;
+            font-size: 4em;
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        .quote-large::before {
+            top: -20px;
+            left: 0;
+        }
+
+        .quote-large::after {
+            content: '"';
+            bottom: -40px;
+            right: 0;
+        }
+
+        .future-list {
+            text-align: left;
+            background: rgba(0,0,0,0.2);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
+
+        .future-list h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .future-list ul {
+            list-style: none;
+            font-size: 1.1em;
+            line-height: 2;
+        }
+
+        .future-list li {
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .future-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            opacity: 0.7;
+        }
+
+        /* Final Section */
+        .final-section {
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .final-content {
+            max-width: 600px;
+        }
+
+        .yasmin-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 5em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 50%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 5s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .final-message {
+            font-size: 1.3em;
+            line-height: 2;
+            opacity: 0.9;
+        }
+
+        .closing {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .closing-text {
+            font-style: italic;
+            font-size: 1.1em;
+            opacity: 0.7;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-title { font-size: 2em; }
+            .hero-title { font-size: 2.5em; }
+            .section-title { font-size: 2em; }
+            .letter-paper { padding: 30px 20px; }
+            .yasmin-name { font-size: 3em; }
+            .quote-large { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Control -->
+    <div class="audio-control" onclick="toggleMusic()" id="audioBtn">🎵</div>
+
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="src/membasuh.MP3" type="audio/mpeg">
+    </audio>
+
+    <!-- GAME PORTAL - HANYA INI SATU GAME -->
+    <div id="gamePortal">
+        <div class="nebula"></div>
+        
+        <h1 class="game-title">REASSEMBLE</h1>
+        <p class="game-subtitle">
+            Yasmin, ada yang hancur bukan berarti akhir.<br>
+            Kumpulkan fragmen-fragmen ini untuk membuka portal ke halaman selanjutnya.
+        </p>
+
+        <div class="puzzle-container">
+            <div class="orbit orbit-1"></div>
+            <div class="orbit orbit-2"></div>
+            <div class="orbit orbit-3"></div>
+            
+            <div class="center-core" id="centerCore" onclick="activateCore()">💎</div>
+            
+            <div class="fragment fragment-1" onclick="collectFragment(this)">🌟</div>
+            <div class="fragment fragment-2" onclick="collectFragment(this)">🌙</div>
+            <div class="fragment fragment-3" onclick="collectFragment(this)">🔥</div>
+            <div class="fragment fragment-4" onclick="collectFragment(this)">🌊</div>
+            <div class="fragment fragment-5" onclick="collectFragment(this)">🌱</div>
+            <div class="fragment fragment-6" onclick="collectFragment(this)">💫</div>
+            <div class="fragment fragment-7" onclick="collectFragment(this)">⚡</div>
+            <div class="fragment fragment-8" onclick="collectFragment(this)">🦋</div>
+        </div>
+
+        <div class="progress-text" id="progressText">0 / 8 FRAGMENTS COLLECTED</div>
+        
+        <button class="enter-btn" id="enterBtn" onclick="enterMainContent()">
+            ENTER THE JOURNEY
+        </button>
+
+        <div class="hint-text">Klik fragmen-fragmen di sekitar orbit untuk mengumpulkannya</div>
+    </div>
+
+    <!-- MAIN CONTENT - TANPA GAME -->
+    <div id="mainContent">
+        
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Hey Yasmin
+                    <span>ini bukan akhir, ini reset button</span>
+                </h1>
+                <p class="hero-text">
+                    Aku tahu rasanya seperti dunia runtuh. Tapi percayalah, setiap reruntuhan adalah fondasi untuk membangun sesuatu yang lebih kuat. Kamu tidak sedang kehilangan seseorang—kamu sedang menemukan kembali dirimu sendiri.
+                </p>
+            </div>
+            <div class="scroll-hint">↓</div>
+        </section>
+
+        <!-- Letter Section -->
+        <section class="content-section letter-section">
+            <div class="container">
+                <div class="section-header">Pesan Dari AI</div>
+                <h2 class="section-title">Sebuah Korespondensi</h2>
+                
+                <div class="letter-paper">
+                    <div class="letter-content">
+                        <p class="greeting">Yasmin,</p>
+                        
+                        <p>
+                            Pertama-tama, aku ingin kamu tahu bahwa rasa sakit yang kamu rasakan saat ini valid. Tidak ada yang salah dengan sedih, tidak ada yang salah dengan kecewa, dan tidak ada yang salah dengan merasa hancur. Kamu manusia, dan manusia berhak merasakan semua ini.
+                        </p>
+
+                        <p>
+                            Tapi ada yang perlu kamu pahami: <strong>putus bukan definisi dari nilai dirimu.</strong> Hubungan yang berakhir bukan berarti kamu gagal. Kadang dua orang yang baik belum tentu baik bersama, dan itu bukan salah siapa-siapa. Ini bukan tentang siapa yang salah, tapi tentang apa yang sudah tidak cocok lagi.
+                        </p>
+
+                        <div class="highlight-box">
+                            "Luka yang sama tidak bisa disembuhkan oleh orang yang sama yang menyebabkannya. Kadang kita harus berjalan menjauh untuk menemukan arah yang benar."
+                        </div>
+
+                        <p>
+                            Aku lihat potensi besar dalam dirimu, Yasmin. Kamu punya energi, punya mimpi, punya seluruh hidup di depanmu yang menunggu untuk dijelajahi. Jangan biarkan satu chapter yang kurang menyenangkan mengaburkan keseluruhan buku yang masih panjang itu.
+                        </p>
+
+                        <p>
+                            Prosesnya akan sulit. Ada malam-malam di mana kamu akan memeriksa ponsel berharap ada pesan. Ada momen-momen di mana kenangan datang tiba-tiba dan membuatmu sesak napas. Itu normal. Biarkan datang, rasakan, lalu biarkan lewat seperti awan di langit—ada, tapi tidak permanen.
+                        </p>
+
+                        <p>
+                            Yang terpenting sekarang: fokus pada dirimu. Bukan untuk membalas dendam dengan sukses, bukan untuk membuktikan apa-apa, tapi karena kamu berharga dan layak mendapatkan versi terbaik dari dirimu sendiri.
+                        </p>
+
+                        <div class="signature-block">
+                            <div>Salam hangat,</div>
+                            <div class="name">Senior-mu tapi yang ngetik AI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reality Check Section -->
+        <section class="content-section reality-section">
+            <div class="container">
+                <div class="section-header">Realitas yang Perlu Diterima</div>
+                <h2 class="section-title">Fakta-Fakta Pahit Tapi Benar</h2>
+
+                <div class="truth-grid">
+                    <div class="truth-card">
+                        <div class="truth-number">01</div>
+                        <h3 class="truth-title">Closure Tidak Selalu Datang</h3>
+                        <p class="truth-text">
+                            Kamu mungkin tidak pernah mendapatkan penjelasan yang memuaskan. Tidak setiap pertanyaan mendapat jawaban, dan itu harus kamu terima. Closure sejati datang dari dalam dirimu sendiri, bukan dari penjelasan orang lain.
+                        </p>
+                    </div>
+
+                    <div class="truth-card">
+                        <div class="truth-number">02</div>
+                        <h3 class="truth-title">Mereka Sudah Move On</h3>
+                        <p class="truth-text">
+                            Faktanya, orang lain mungkin sudah melanjutkan hidupnya sementara kamu masih terjebak. Ini bukan tentang siapa yang lebih cepat sembuh, tapi tentang efisiensi—jangan biarkan dirimu tertinggal terlalu jauh dalam proses yang seharusnya sementara.
+                        </p>
+                    </div>
+
+                    <div class="truth-card">
+                        <div class="truth-number">03</div>
+                        <h3 class="truth-title">Cinta Tidak Cukup</h3>
+                        <p class="truth-text">
+                            Mencintai seseorang tidak otomatis membuat hubungan berhasil. Ada timing, kompatibilitas, pertumbuhan personal, dan banyak faktor lain. Cinta yang besar tanpa fondasi yang tepat tetap akan runtuh.
+                        </p>
+                    </div>
+
+                    <div class="truth-card">
+                        <div class="truth-number">04</div>
+                        <h3 class="truth-title">Kamu Akan Melupakan Detailnya</h3>
+                        <p class="truth-text">
+                            Suatu hari nanti, suara mereka, cara mereka tertawa, bahkan wajah mereka akan memudar dari ingatanmu. Jangan takut dengan ini—ini adalah bukti bahwa waktu memang menyembuhkan, meski prosesnya perlahan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Future Section -->
+        <section class="content-section future-section">
+            <div class="container future-content">
+                <div class="section-header">Yang Akan Datang</div>
+                <h2 class="section-title" style="color: #fff;">Ini Baru Awal</h2>
+
+                <div class="quote-large">
+                    Rasa sakit ini bukan penjara, tapi pintu gerbang. Di baliknya ada versi dirimu yang lebih kuat, lebih bijaksana, dan lebih siap untuk cinta yang sebenarnya pantas kamu dapatkan.
+                </div>
+
+                <div class="future-list">
+                    <h3>Apa yang Menantimu:</h3>
+                    <ul>
+                        <li>Momen di mana kamu bangun dan pertama kali tidak memikirkannya</li>
+                        <li>Tawa yang tulus tanpa beban di hati</li>
+                        <li>Orang baru yang membuatmu mengerti mengapa yang dulu tidak berhasil</li>
+                        <li>Pencapaian pribadi yang membuatmu bangga pada dirimu sendiri</li>
+                        <li>Kemampuan untuk melihat kenangan itu sebagai pelajaran, bukan beban</li>
+                        <li>Kekuatan untuk membantu orang lain yang mengalami hal serupa</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Section -->
+        <section class="final-section">
+            <div class="final-content">
+                <div class="yasmin-name">YASMIN</div>
+                <div class="final-message">
+                    <p>
+                        Kamu lebih kuat dari yang kamu kira.<br>
+                        Lebih berharga dari yang kamu sadari.<br>
+                        Dan lebih siap untuk masa depan dari yang kamu duga.<br><br>
+                        
+                        Ini bukan akhir.<br>
+                        Ini adalah <strong>Level 1 dari versi baru dirimu.</strong>
+                    </p>
+                    
+                    <div class="closing">
+                        <div class="closing-text">
+                            "What feels like the end is often the beginning."<br><br>
+                            — Untukmu yang sedang naik level
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Audio
+        let isPlaying = false;
+        const bgMusic = document.getElementById('bgMusic');
+        const audioBtn = document.getElementById('audioBtn');
+
+        window.addEventListener('load', () => {
+            bgMusic.volume = 0.4;
+            bgMusic.play().then(() => {
+                isPlaying = true;
+                audioBtn.textContent = '🔊';
+            }).catch(() => {
+                audioBtn.textContent = '🔇';
+            });
+        });
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                audioBtn.textContent = '🔇';
+            } else {
+                bgMusic.play();
+                audioBtn.textContent = '🔊';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Game Logic
+        let fragmentsCollected = 0;
+        const totalFragments = 8;
+        let coreActivated = false;
+
+        function collectFragment(element) {
+            if (element.classList.contains('collected')) return;
+            
+            element.classList.add('collected');
+            fragmentsCollected++;
+            
+            // Create particle effect
+            createParticles(element);
+            
+            updateProgress();
+            
+            if (fragmentsCollected === totalFragments) {
+                document.getElementById('centerCore').classList.add('activated');
+                document.getElementById('centerCore').textContent = '✨';
+            }
+        }
+
+        function activateCore() {
+            if (fragmentsCollected === totalFragments && !coreActivated) {
+                coreActivated = true;
+                document.getElementById('enterBtn').style.display = 'inline-block';
+                document.getElementById('progressText').textContent = 'PORTAL READY';
+                document.getElementById('progressText').style.color = '#f093fb';
+                
+                // Burst effect
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        createBurstParticle();
+                    }, i * 50);
+                }
+            }
+        }
+
+        function updateProgress() {
+            document.getElementById('progressText').textContent = 
+                `${fragmentsCollected} / ${totalFragments} FRAGMENTS COLLECTED`;
+        }
+
+        function createParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                particle.style.width = Math.random() * 6 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                
+                const angle = (Math.PI * 2 * i) / 10;
+                const velocity = 100 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.transition = 'all 0.8s ease-out';
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.style.transform = `translate(${tx}px, ${ty}px)`;
+                    particle.style.opacity = '0';
+                }, 10);
+                
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+
+        function createBurstParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = '50%';
+            particle.style.top = '50%';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.background = '#f093fb';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 200 + Math.random() * 300;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            particle.style.transition = 'all 1s ease-out';
+            document.getElementById('gamePortal').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.style.transform = `translate(${tx}px, ${ty}px)`;
+                particle.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        function enterMainContent() {
+            const portal = document.getElementById('gamePortal');
+            portal.style.transition = 'opacity 1s ease, transform 1s ease';
+            portal.style.opacity = '0';
+            portal.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                portal.style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                document.body.style.overflow = 'auto';
+                
+                // Scroll reveal animation
+                observeElements();
+            }, 1000);
+        }
+
+        // Scroll animations
+        function observeElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.truth-card, .letter-paper, .future-list').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.8s ease';
+                observer.observe(el);
+            });
+        }
+    </script>
+</body>
+</html>
